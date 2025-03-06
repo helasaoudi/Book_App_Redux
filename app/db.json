@@ -1,25 +1,33 @@
 {
   "books": [
     {
-      "id": 1,
+      "id": "1",
       "title": "Le Petit Prince",
       "description": "Un classique de la littérature française.",
       "image": "https://i5.walmartimages.com/seo/Le-Petit-Prince-French-Edition-Pre-Owned-Hardcover-0152164154-9780152164157-Antoine-de-Saint-Exupry_0028025a-d2fd-4a9b-8054-fdd89799de36.b41821fd7ee7d75ac4e0f3e298445792.jpeg",
       "price": 20
     },
     {
-      "id": 2,
+      "id": "2",
       "title": "1984",
       "description": "Un roman dystopique de George Orwell.",
       "image": "https://bdzoom.com/wp-content/uploads/2021/01/AA-0.jpg",
       "price": 20
     },
     {
-      "id": 3,
+      "id": "3",
       "title": "Harry Potter à l'école des sorciers",
       "description": "Le premier tome de la série Harry Potter.",
       "image": "https://m.media-amazon.com/images/M/MV5BMTgwNWM4NzQtMzc5Zi00ZmM1LWFjY2ItOWU0MTMwN2I5Y2Y3XkEyXkFqcGc@._V1_.jpg",
       "price": 20
+    },
+    {
+      "id": "407d",
+      "title": "Livre 2",
+      "description": "Livre3",
+      "image": "Livre2",
+      "price": "Livre7",
+      "author": "Livre7"
     }
-    ]
+  ]
 }

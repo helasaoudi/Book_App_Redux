@@ -1,42 +1,23 @@
+import React, { useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBooks } from './features/booksSlice';
+import { RootState, AppDispatch } from '../store';
 
-import { useEffect, useState } from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+const BookListScreen = ({ navigation }) => {
+  const dispatch: AppDispatch = useDispatch();
+  const { books, loading, error } = useSelector((state: RootState) => state.books);
 
-type Book = {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  price?: number;
-  author?: string;
-};
-
-export default function BookListScreen({ navigation }: { navigation: any }) {
-  const [books, setBooks] = useState<Book[]>([]);
-
-  // Fonction pour charger les livres depuis le serveur
-  const loadBooks = async () => {
-    try {
-      const response = await fetch('http://192.168.1.13:3000/books');
-      const data = await response.json();
-      setBooks(data);
-      console.log("data",data) // Assurez-vous que la clé 'books' existe dans la réponse du serveur
-    } catch (error) {
-      console.error('Error loading books:', error);
-    }
-  };
-
-  // Utiliser useEffect pour charger les livres lors du montage du composant
   useEffect(() => {
-    loadBooks();
-  }, []);
+    dispatch(fetchBooks());
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>📚 Liste des Livres</Text>
       <FlatList
         data={books}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity onPress={() => navigation.navigate('DetailsBook', { book: item })}>
             <View style={styles.card}>
@@ -52,7 +33,7 @@ export default function BookListScreen({ navigation }: { navigation: any }) {
       />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -99,3 +80,5 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
 });
+
+export default BookListScreen;

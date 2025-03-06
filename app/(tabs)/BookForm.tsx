@@ -1,58 +1,26 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { useDispatch } from 'react-redux';
+import { addBook } from './features/booksSlice';
 
-type RootStackParamList = {
-  BookList: { newBook?: Book };
-  AddBook: undefined;
-};
-
-type Book = {
-  id: number;
-  title: string;
-  description: string;
-  image?: string;
-  price:number;
-  author:string;
-};
-
-type AddBookScreenNavigationProp = StackNavigationProp<RootStackParamList, 'AddBook'>;
-
-const AddBookScreen = () => {
+const AddBookScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [image, setImage] = useState('');
   const [price, setPrice] = useState('');
   const [author, setAuthor] = useState('');
 
-
-  const navigation = useNavigation();
-
-  const handleAddBook = async () => {
+  const handleAddBook = () => {
     if (title.trim() === '' || description.trim() === '') {
       Alert.alert('Erreur', 'Tous les champs sont obligatoires');
       return;
     }
 
-    try {
-      const response = await fetch('http://192.168.1.13:3000/books', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, description, image,price,author }),
-      });
-
-      const newBook = await response.json();
-
-      Alert.alert('Succès', 'Le livre a été ajouté avec succès');
-
-      navigation.navigate('BookList', { newBook });
-    } catch (error) {
-      console.error('Error adding book:', error);
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du livre');
-    }
+    const newBook = { title, description, image, price, author };
+    dispatch(addBook(newBook));
+    navigation.navigate('BookList');
   };
-
 
   return (
     <View style={styles.container}>
@@ -74,14 +42,14 @@ const AddBookScreen = () => {
         onChangeText={setImage}
         style={styles.input}
       />
-       <TextInput
+      <TextInput
         placeholder="Prix"
         value={price}
         onChangeText={setPrice}
         style={styles.input}
       />
-        <TextInput
-        placeholder="author"
+      <TextInput
+        placeholder="Auteur"
         value={author}
         onChangeText={setAuthor}
         style={styles.input}

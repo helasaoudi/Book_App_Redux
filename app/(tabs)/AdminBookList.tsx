@@ -1,83 +1,37 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { View, Text, FlatList, Button, StyleSheet, Modal, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Modal, TextInput, Alert, Button } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useFocusEffect } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RouteProp } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchBooks, deleteBook, updateBook } from './features/booksSlice';
+import { RootState, AppDispatch } from './Store/store';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
-type RootStackParamList = {
-  BookList: { newBook?: Book };
-  AddBook: undefined;
-};
-
-type Book = {
-  id: number;
-  title: string;
-  description: string;
-  image?: string;
-};
-type BookListScreenNavigationProp = StackNavigationProp<RootStackParamList, 'BookList'>;
-type BookListScreenRouteProp = RouteProp<RootStackParamList, 'BookList'>;
 
 const BookListAdmin = () => {
-  const [booksList, setBooksList] = useState<Book[]>([]);
+  const dispatch: AppDispatch = useDispatch();
+  const { books, loading, error } = useSelector((state: RootState) => state.books);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentBook, setCurrentBook] = useState<Book | null>(null);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const navigation = useNavigation();
-  const route = useRoute(); // Ajouter cette ligne pour accéder aux paramètres de route
 
-  // Charger les livres à chaque fois que l'écran devient actif
-  useFocusEffect(
-    useCallback(() => {
-      loadBooks();
-    }, [])
-  );
 
-  // Charger la liste des livres
-  const loadBooks = async () => {
-    try {
-      const response = await fetch('http://192.168.1.13:3000/books');
-      if (!response.ok) {
-        throw new Error('Erreur lors du chargement des livres');
-      }
-      const data = await response.json();
-      setBooksList(data);
-    } catch (error) {
-      console.error('Erreur lors du chargement des livres:', error);
-      Alert.alert('Erreur', 'Impossible de charger les livres.');
-    }
-  };
-
-  // Ajouter un livre si un nouveau livre est passé en paramètre
   useEffect(() => {
-    if (route.params?.newBook) {
-      setBooksList((prevBooks) => [...prevBooks, route.params.newBook]);
-    }
-  }, [route.params?.newBook]);
+    dispatch(fetchBooks());
+  }, [dispatch]);
 
-  // Supprimer un livre
-  const handleDeleteBook = async (id: number) => {
+  const handleDeleteBook = (id: number) => {
     Alert.alert('Confirmer la suppression', 'Êtes-vous sûr de vouloir supprimer ce livre ?', [
       { text: 'Annuler', style: 'cancel' },
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
-          try {
-            await fetch(`http://192.168.1.13:3000/books/${id}`, { method: 'DELETE' });
-            loadBooks();
-          } catch (error) {
-            console.error('Erreur lors de la suppression du livre:', error);
-          }
-        },
+        onPress: () => dispatch(deleteBook(id)),
       },
     ]);
   };
 
-  // Modifier un livre
   const handleEditBook = (book: Book) => {
     setCurrentBook(book);
     setNewTitle(book.title);
@@ -85,32 +39,18 @@ const BookListAdmin = () => {
     setModalVisible(true);
   };
 
-  // Sauvegarder les changements
-  const handleSaveChanges = async () => {
+  const handleSaveChanges = () => {
     if (currentBook) {
-      try {
-        await fetch(`http://192.168.1.13:3000/books/${currentBook.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: newTitle,
-            description: newDescription,
-            image: currentBook.image || '', // Assurer qu'on ne passe pas une valeur indéfinie pour l'image
-          }),
-        });
-
-        setModalVisible(false);
-        loadBooks();
-      } catch (error) {
-        console.error('Erreur lors de la mise à jour du livre:', error);
-      }
+      const updatedBook = { ...currentBook, title: newTitle, description: newDescription };
+      dispatch(updateBook(updatedBook));
+      setModalVisible(false);
     }
   };
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={booksList}
+        data={books}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -154,7 +94,6 @@ const BookListAdmin = () => {
           </View>
         </View>
       </Modal>
-
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate('AddBook')}
@@ -170,6 +109,11 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 10,
     backgroundColor: '#F5F5F5',
+  },
+  addButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
   },
   card: {
     backgroundColor: '#FFF',
@@ -201,11 +145,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginHorizontal: 10,
-  },
-  addButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
   },
   modalOverlay: {
     flex: 1,

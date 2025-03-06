@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useUserContext } from './UserContext';
 
-export default function CartScreen({ route, navigation }: { route: any, navigation: any }) {
+const CartScreen = ({ route, navigation }) => {
   const { book, quantity: initialQuantity } = route.params;
-  const { addToCart, cart } = useUserContext(); // Utiliser le contexte
+  const { addToCart, cart } = useUserContext();
   const [quantity, setQuantity] = useState(initialQuantity);
 
   useEffect(() => {
-    // Si le livre existe déjà dans le panier, définir la quantité
     const existingBook = cart.find((item) => item.book.title === book.title);
     if (existingBook) {
       setQuantity(existingBook.quantity);
@@ -19,28 +18,25 @@ export default function CartScreen({ route, navigation }: { route: any, navigati
   const decreaseQuantity = () => setQuantity((prevQuantity) => (prevQuantity > 0 ? prevQuantity - 1 : 0));
 
   const handleValidate = () => {
-    addToCart(book, quantity); // Ajouter ou mettre à jour le panier avec le livre et la quantité
+    addToCart(book, quantity);
     alert(`Commande validée pour ${book.title} avec ${quantity} articles`);
-    navigation.navigate('BookList'); // Rediriger vers BookList
+    navigation.navigate('BookList');
   };
 
-  const renderCartItem = ({ item }: { item: { book: any; quantity: number } }) => {
-    return (
-      <View style={styles.cartItem}>
-        <Image source={{ uri: item.book.image }} style={styles.cartItemImage} />
-        <View style={styles.cartItemDetails}>
-          <Text style={styles.cartItemTitle}>{item.book.title}</Text>
-          <Text style={styles.cartItemPrice}>Prix: {item.book.prix} DTN</Text>
-          <Text style={styles.cartItemQuantity}>Quantité: {item.quantity}</Text>
-          <Text style={styles.cartItemTotal}>Total: {item.quantity * parseFloat(item.book.prix)} DTN</Text>
-        </View>
+  const renderCartItem = ({ item }) => (
+    <View style={styles.cartItem}>
+      <Image source={{ uri: item.book.image }} style={styles.cartItemImage} />
+      <View style={styles.cartItemDetails}>
+        <Text style={styles.cartItemTitle}>{item.book.title}</Text>
+        <Text style={styles.cartItemPrice}>Prix: {item.book.price} DTN</Text>
+        <Text style={styles.cartItemQuantity}>Quantité: {item.quantity}</Text>
+        <Text style={styles.cartItemTotal}>Total: {item.quantity * parseFloat(item.book.price)} DTN</Text>
       </View>
-    );
-  };
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* Affichage de la liste des livres dans le panier */}
       <FlatList
         data={cart}
         renderItem={renderCartItem}
@@ -48,11 +44,10 @@ export default function CartScreen({ route, navigation }: { route: any, navigati
         style={styles.cartList}
       />
 
-      {/* Affichage du livre actuel avec son détail */}
       <View style={styles.card}>
         <Image source={{ uri: book.image }} style={styles.image} />
         <Text style={styles.bookTitle}>{book.title}</Text>
-        <Text style={styles.price}>Prix: {book.prix} DTN</Text>
+        <Text style={styles.price}>Prix: {book.price} DTN</Text>
 
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={decreaseQuantity} style={styles.button}>
@@ -70,7 +65,7 @@ export default function CartScreen({ route, navigation }: { route: any, navigati
       </TouchableOpacity>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -164,3 +159,5 @@ const styles = StyleSheet.create({
     color: '#f5b8ef',
   },
 });
+
+export default CartScreen;
